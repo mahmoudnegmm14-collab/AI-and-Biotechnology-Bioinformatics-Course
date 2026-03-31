@@ -1,0 +1,76 @@
+# Task 2: Molecular Descriptor Calculation
+
+## Method Used
+Molecular descriptors were calculated using RDKit (a cheminformatics toolkit).
+
+---
+
+## Descriptor Calculation Code
+
+```python
+from rdkit import Chem
+from rdkit.Chem import Descriptors, Lipinski
+import numpy as np
+import pandas as pd
+
+def lipinski(smiles):
+
+    moldata = []
+    for elem in smiles:
+        mol = Chem.MolFromSmiles(elem)
+        moldata.append(mol)
+
+    baseData = np.arange(1,1)
+    i = 0
+    for mol in moldata:
+
+        desc_MolWt = Descriptors.MolWt(mol)
+        desc_MolLogP = Descriptors.MolLogP(mol)
+        desc_NumHDonors = Lipinski.NumHDonors(mol)
+        desc_NumHAcceptors = Lipinski.NumHAcceptors(mol)
+
+        row = np.array([
+            desc_MolWt,
+            desc_MolLogP,
+            desc_NumHDonors,
+            desc_NumHAcceptors
+        ])
+
+        if i == 0:
+            baseData = row
+        else:
+            baseData = np.vstack([baseData, row])
+
+        i += 1
+
+    columnNames = ["MW", "LogP", "NumHDonors", "NumHAcceptors"]
+    descriptors = pd.DataFrame(data=baseData, columns=columnNames)
+
+    return descriptors
+```
+
+---
+
+## Applying Descriptor Calculation
+
+```python
+df_lipinski = lipinski(df_clean_smiles.canonical_smiles)
+df_lipinski.head()
+```
+
+---
+
+## Output
+- File: `df_lipinski.csv`  
+- Number of descriptors: **4 (2D descriptors)**  
+  - Molecular Weight (MW)  
+  - LogP  
+  - Number of Hydrogen Bond Donors  
+  - Number of Hydrogen Bond Acceptors  
+
+---
+
+## Summary
+- Molecular descriptors were successfully calculated using RDKit  
+- These descriptors represent physicochemical properties of compounds  
+- The resulting dataset is suitable for QSAR modeling  
